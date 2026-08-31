@@ -6,18 +6,24 @@
  * - Records are separated by CRLF.
  * - Output is prefixed with a UTF-8 BOM so Excel / LibreOffice render emoji and
  *   diacritics correctly.
+ * - Formula injection guard: a field that would begin with `= + - @` or a
+ *   TAB/CR (which Excel, Sheets and LibreOffice treat as a formula) is prefixed
+ *   with a single quote and quoted. Instagram display names are set by other
+ *   people, so this input is untrusted.
  */
 
 const BOM = '﻿';
 
 /**
- * Quote a single field per RFC 4180.
+ * Quote a single field per RFC 4180, neutralising spreadsheet formula injection.
  * @param {*} value
  * @returns {string}
  */
 export function csvField(value) {
   let s = value == null ? '' : String(value);
-  if (/[",\r\n]/.test(s)) {
+  const risky = /^[=+\-@\t\r]/.test(s);
+  if (risky) s = "'" + s;
+  if (risky || /[",\r\n]/.test(s)) {
     s = '"' + s.replace(/"/g, '""') + '"';
   }
   return s;
