@@ -1,0 +1,58 @@
+# ONE·WAY — self-hosted, 100% client-side Instagram export analyzer.
+# Compose v2/v3 schema (no top-level `version:` key — it is obsolete).
+#
+#   cp .env.example .env      # optional; only to change port / bind address
+#   docker compose up -d --build
+#   docker compose ps         # STATUS should read "healthy"
+#
+# By default the container publishes on loopback only (127.0.0.1:8477). That
+# suits the recommended access pattern:
+#
+#   sudo tailscale serve --bg --https=443 http://127.0.0.1:8477
+#
+# which puts it at https://<machine>.<tailnet>.ts.net for your tailnet only.
+#
+# To skip `tailscale serve` and hit the container directly on the machine's
+# tailnet IP, set the bind address to all interfaces in .env:
+#
+#   ONEWAY_BIND=0.0.0.0
+#   ONEWAY_PORT=8477
+#
+# then `docker compose up -d` and browse http://<tailscale-ip>:8477 from a
+# tailnet device. Do NOT pair 0.0.0.0 with `tailscale funnel` — that would put
+# your follower data on the public internet.
+
+services:
+  oneway:
+    build: .
+    container_name: oneway
+    ports:
+      - "${ONEWAY_BIND:-127.0.0.1}:${ONEWAY_PORT:-8477}:80"
+    restart: unless-stopped
+
+    # The image needs nothing on disk at runtime — every byte of analysis
+    # happens in the visitor's browser. Lock the filesystem down.
+    read_only: true
+    tmpfs:
+      - /var/cache/nginx
+      - /var/run
+
+    # Drop every Linux capability, then add back only what nginx:alpine needs to
+    # start its worker processes and bind port 80 inside the container.
+    cap_drop:
+      - ALL
+    cap_add:
+      - CHOWN
+      - SETUID
+      - SETGID
+      - NET_BIND_SERVICE
+
+    security_opt:
+      - "no-new-privileges:true"
+
+    healthcheck:
+      test: ["CMD", "wget", "-q", "--spider", "http://localhost:80/"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 5s

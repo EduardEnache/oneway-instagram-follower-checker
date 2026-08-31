@@ -1,0 +1,4 @@
+[
+  { "timestamp": 1600100000, "media": [], "label_values": [ { "label": "URL", "value": "" }, { "label": "Name", "value": "Alice Moraru" }, { "label": "Username", "value": "alice_m" } ], "fbid": "1001" },
+  { "timestamp": 1600100100, "media": [], "label_values": [ { "label": "URL", "value": "" }, { "label": "Name", "value": "Bob" }, { "label": "Username", "value": "bob.dev" } ], "fbid": "1002" }
+]

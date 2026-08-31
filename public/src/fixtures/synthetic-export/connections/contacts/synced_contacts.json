@@ -1,0 +1,66 @@
+{
+  "contacts_contact_info": [
+    {
+      "string_map_data": {
+        "First Name": {
+          "value": "Alice"
+        },
+        "Last Name": {
+          "value": "Moraru"
+        },
+        "Contact Information": {
+          "value": "+40711111111"
+        },
+        "Imported Time": {
+          "timestamp": 1600000000
+        }
+      }
+    },
+    {
+      "string_map_data": {
+        "First Name": {
+          "value": "Dan"
+        },
+        "Last Name": {
+          "value": "Ionescu"
+        },
+        "Contact Information": {
+          "value": "722222222"
+        }
+      }
+    },
+    {
+      "string_map_data": {
+        "First Name": {
+          "value": "Stefan"
+        },
+        "Contact Information": {
+          "value": "733333333"
+        }
+      }
+    },
+    {
+      "string_map_data": {
+        "Contact Information": {
+          "value": "744444444"
+        }
+      }
+    },
+    {
+      "string_map_data": {
+        "First Name": {
+          "value": "\u00c8\u0098tef\u00c4\u0083nel"
+        },
+        "Last Name": {
+          "value": "Pop\u00c4\u0083"
+        },
+        "Contact Information": {
+          "value": "+40755555555"
+        },
+        "Imported Time": {
+          "timestamp": 1600500000
+        }
+      }
+    }
+  ]
+}

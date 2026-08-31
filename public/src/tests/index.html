@@ -1,0 +1,24 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>ONE·WAY tests</title>
+  <style>
+    body { font: 14px/1.5 ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; margin: 24px; background: #100f12; color: #edeae1; }
+    h1 { font-size: 16px; }
+    #out pre { margin: 0 0 2px; white-space: pre-wrap; }
+    .t-pass { color: #4fa98b; }
+    .t-pass::before { content: "✓ "; }
+    .t-fail { color: #e06c6c; }
+    .t-fail::before { content: "✗ "; }
+    .t-summary-ok { color: #4fa98b; font-weight: 700; margin-top: 12px !important; }
+    .t-summary-bad { color: #e06c6c; font-weight: 700; margin-top: 12px !important; }
+  </style>
+</head>
+<body>
+  <h1>ONE·WAY test run</h1>
+  <div id="out"></div>
+  <script type="module" src="./run.js"></script>
+</body>
+</html>

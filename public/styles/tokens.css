@@ -1,0 +1,179 @@
+/* ONE·WAY — design tokens. The only place raw colour/scale values live.
+ * Theme mechanism (three states):
+ *   1. bare :root .......................... light (default)
+ *   2. @media (prefers-color-scheme: dark)
+ *        guarded :root:not([data-theme="light"]) ... system-dark
+ *   3. :root[data-theme="dark"] ............. explicit dark (wins both ways)
+ * Colours are declared hex-first, then OKLCH — the OKLCH line wins where supported,
+ * the hex line is the fallback.
+ */
+
+:root {
+  color-scheme: light;
+
+  /* ---- Colour: light ---- */
+  --bg: #f5f2ec;
+  --bg: oklch(96.18% 0.009 84.6);
+  --surface: #fffdf9;
+  --surface: oklch(99.45% 0.006 84.6);
+  --surface-2: #ede8dc;
+  --surface-2: oklch(92.35% 0.015 86);
+  --fg: #16150f;
+  --fg: oklch(19.47% 0.012 99.5);
+  --fg-muted: #6b675c;
+  --fg-muted: oklch(51.41% 0.018 90.3);
+  --rule: #dcd6c9;
+  --rule: oklch(87.73% 0.019 86.2);
+  --accent: #c8461a;
+  --accent: oklch(57% 0.174 37.4);
+  --accent-fg: #fffdf9;
+  --accent-fg: oklch(99.45% 0.006 84.6);
+  --positive: #2c6b57;
+  --positive: oklch(48.05% 0.073 169.5);
+  --negative: #9b2c2c;
+  --negative: oklch(46.5% 0.147 24.9);
+  --focus: var(--accent);
+
+  /* washes — solid fallback first, then color-mix */
+  --tint-accent: #f6e3da;
+  --tint-accent: color-mix(in oklab, var(--accent) 12%, var(--surface));
+  --tint-positive: #dfe9e4;
+  --tint-positive: color-mix(in oklab, var(--positive) 12%, var(--surface));
+  --tint-negative: #f0dedd;
+  --tint-negative: color-mix(in oklab, var(--negative) 12%, var(--surface));
+  --tint-neutral: #ebe7dd;
+  --tint-neutral: color-mix(in oklab, var(--fg-muted) 12%, var(--surface));
+
+  /* the single elevation shadow — modals only */
+  --shadow-modal:
+    0 1px 2px rgba(20, 18, 10, 0.06),
+    0 14px 36px -10px rgba(20, 18, 10, 0.26);
+
+  /* ---- Spacing (4px base) ---- */
+  --sp-1: 4px;
+  --sp-2: 8px;
+  --sp-3: 12px;
+  --sp-4: 16px;
+  --sp-5: 24px;
+  --sp-6: 32px;
+  --sp-7: 48px;
+  --sp-8: 64px;
+  --sp-9: 96px;
+
+  /* ---- Typography ---- */
+  --font-display: "Bricolage Grotesque", ui-sans-serif, system-ui, -apple-system,
+    "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  --font-ui: "Inter", ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto,
+    Helvetica, Arial, sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, Consolas,
+    "Liberation Mono", monospace;
+
+  --fs-0: 0.8125rem; /* 13 */
+  --fs-1: 1rem; /* 16 */
+  --fs-2: 1.25rem; /* 20 */
+  --fs-3: 1.5625rem; /* 25 */
+  --fs-4: 1.9375rem; /* 31 */
+  --fs-5: 2.4375rem; /* 39 */
+  --fs-6: 3.0625rem; /* 49 */
+
+  --lh-body: 1.5;
+  --lh-display: 1.15;
+
+  /* ---- Geometry ---- */
+  --radius-sm: 2px;
+  --row-h: 44px;
+  --maxw: 1400px;
+  --sidebar-w: 240px;
+
+  /* ---- Motion (single curve; zeroed under reduced motion in base.css) ---- */
+  --dur: 160ms;
+  --dur-slow: 280ms;
+  --ease: cubic-bezier(0.32, 0.72, 0, 1);
+
+  /* ---- Z layers ---- */
+  --z-nav: 20;
+  --z-sticky: 30;
+  --z-slideover: 40;
+  --z-modal: 50;
+  --z-toast: 60;
+}
+
+/* ---- Colour: system dark (only when not explicitly light) ---- */
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    color-scheme: dark;
+
+    --bg: #100f12;
+    --bg: oklch(17.1% 0.006 300.9);
+    --surface: #17161a;
+    --surface: oklch(20.31% 0.008 297.1);
+    --surface-2: #201f24;
+    --surface-2: oklch(24.6% 0.009 300);
+    --fg: #edeae1;
+    --fg: oklch(93.69% 0.012 91.5);
+    --fg-muted: #9a958a;
+    --fg-muted: oklch(67.09% 0.017 86.4);
+    --rule: #2a282f;
+    --rule: oklch(28.18% 0.013 298.6);
+    --accent: #ff6a38;
+    --accent: oklch(70.35% 0.193 38.3);
+    --accent-fg: #100f12;
+    --accent-fg: oklch(17.1% 0.006 300.9);
+    --positive: #4fa98b;
+    --positive: oklch(67.1% 0.098 168.9);
+    --negative: #e06c6c;
+    --negative: oklch(66.89% 0.145 21.7);
+
+    --tint-accent: #35211b;
+    --tint-accent: color-mix(in oklab, var(--accent) 18%, var(--surface));
+    --tint-positive: #1e2f2a;
+    --tint-positive: color-mix(in oklab, var(--positive) 18%, var(--surface));
+    --tint-negative: #332223;
+    --tint-negative: color-mix(in oklab, var(--negative) 18%, var(--surface));
+    --tint-neutral: #26252a;
+    --tint-neutral: color-mix(in oklab, var(--fg-muted) 16%, var(--surface));
+
+    --shadow-modal:
+      0 1px 2px rgba(0, 0, 0, 0.5),
+      0 18px 44px -10px rgba(0, 0, 0, 0.62);
+  }
+}
+
+/* ---- Colour: explicit dark (wins regardless of OS) ---- */
+:root[data-theme="dark"] {
+  color-scheme: dark;
+
+  --bg: #100f12;
+  --bg: oklch(17.1% 0.006 300.9);
+  --surface: #17161a;
+  --surface: oklch(20.31% 0.008 297.1);
+  --surface-2: #201f24;
+  --surface-2: oklch(24.6% 0.009 300);
+  --fg: #edeae1;
+  --fg: oklch(93.69% 0.012 91.5);
+  --fg-muted: #9a958a;
+  --fg-muted: oklch(67.09% 0.017 86.4);
+  --rule: #2a282f;
+  --rule: oklch(28.18% 0.013 298.6);
+  --accent: #ff6a38;
+  --accent: oklch(70.35% 0.193 38.3);
+  --accent-fg: #100f12;
+  --accent-fg: oklch(17.1% 0.006 300.9);
+  --positive: #4fa98b;
+  --positive: oklch(67.1% 0.098 168.9);
+  --negative: #e06c6c;
+  --negative: oklch(66.89% 0.145 21.7);
+
+  --tint-accent: #35211b;
+  --tint-accent: color-mix(in oklab, var(--accent) 18%, var(--surface));
+  --tint-positive: #1e2f2a;
+  --tint-positive: color-mix(in oklab, var(--positive) 18%, var(--surface));
+  --tint-negative: #332223;
+  --tint-negative: color-mix(in oklab, var(--negative) 18%, var(--surface));
+  --tint-neutral: #26252a;
+  --tint-neutral: color-mix(in oklab, var(--fg-muted) 16%, var(--surface));
+
+  --shadow-modal:
+    0 1px 2px rgba(0, 0, 0, 0.5),
+    0 18px 44px -10px rgba(0, 0, 0, 0.62);
+}

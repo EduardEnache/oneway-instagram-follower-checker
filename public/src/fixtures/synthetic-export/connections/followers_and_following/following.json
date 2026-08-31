@@ -1,0 +1,12 @@
+{
+  "relationships_following": [
+    { "title": "alice_m", "string_list_data": [ { "href": "https://www.instagram.com/_u/alice_m", "timestamp": 1500000100 } ] },
+    { "title": "bob.dev", "string_list_data": [ { "href": "https://www.instagram.com/_u/bob.dev", "timestamp": 1500001100 } ] },
+    { "title": "carol99", "string_list_data": [ { "href": "https://www.instagram.com/_u/carol99", "timestamp": 1500002100 } ] },
+    { "title": "dan_ionescu", "string_list_data": [ { "href": "https://www.instagram.com/_u/dan_ionescu", "timestamp": 1500003100 } ] },
+    { "title": "eve", "string_list_data": [ { "href": "https://www.instagram.com/_u/eve", "timestamp": 1500004100 } ] },
+    { "title": "notback_one", "string_list_data": [ { "href": "https://www.instagram.com/_u/notback_one", "timestamp": 1600000001 } ] },
+    { "title": "notback_two", "string_list_data": [ { "href": "https://www.instagram.com/_u/notback_two", "timestamp": 1600000002 } ] },
+    { "title": "notback_three", "string_list_data": [ { "href": "https://www.instagram.com/_u/notback_three", "timestamp": 1600000003 } ] }
+  ]
+}

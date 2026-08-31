@@ -1,0 +1,28 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>ONE·WAY</title>
+
+  <meta name="color-scheme" content="light dark" />
+  <meta name="theme-color" content="#F5F2EC" media="(prefers-color-scheme: light)" />
+  <meta name="theme-color" content="#100F12" media="(prefers-color-scheme: dark)" />
+  <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+
+  <!-- 1. Sets <html data-theme> before first paint. Non-module, synchronous. -->
+  <script src="/theme-init.js"></script>
+
+  <!-- 2. Preload the latin webfonts used above the fold. latin-ext loads on demand. -->
+  <link rel="preload" href="/assets/fonts/bricolage-grotesque-latin.woff2" as="font" type="font/woff2" crossorigin />
+  <link rel="preload" href="/assets/fonts/inter-latin.woff2" as="font" type="font/woff2" crossorigin />
+  <link rel="preload" href="/assets/fonts/jetbrains-mono-latin.woff2" as="font" type="font/woff2" crossorigin />
+
+  <!-- 3. The single stylesheet. @imports tokens/base/layout/components/charts in order. -->
+  <link rel="stylesheet" href="/styles/index.css" />
+</head>
+<body>
+  <div id="app"></div>
+  <script type="module" src="/src/main.js"></script>
+</body>
+</html>

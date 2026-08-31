@@ -1,0 +1,35 @@
+# The image only needs `public/` and `nginx/`. Keep everything else out so the
+# build context stays tiny and no personal data can ever land in a layer.
+
+# --- Personal data: must never enter the image -------------------------------
+*.zip
+_extract/
+public/src/fixtures/private/
+
+# --- VCS / project meta ----------------------------------------------------
+.git
+.gitignore
+.dockerignore
+.env
+.env.*
+!.env.example
+
+# --- Docs and top-level markdown (not served) --------------------------------
+docs/
+*.md
+
+# --- Dev-only tooling ----------------------------------------------------------
+node_modules/
+scratchpad/
+*.log
+
+# --- OS / editor cruft -------------------------------------------------------
+.DS_Store
+Thumbs.db
+*.swp
+.idea/
+.vscode/
+
+# --- Docker files themselves (not needed inside the context copy) ------------
+Dockerfile
+docker-compose.yml

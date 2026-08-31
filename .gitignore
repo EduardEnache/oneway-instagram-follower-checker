@@ -1,0 +1,14 @@
+# Never commit personal Instagram exports
+*.zip
+_extract/
+public/src/fixtures/private/
+
+# OS / editor cruft
+.DS_Store
+Thumbs.db
+*.swp
+.idea/
+.vscode/
+
+# Node (only used for throwaway dev scripts; no runtime dependency)
+node_modules/
