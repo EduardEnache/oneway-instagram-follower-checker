@@ -7,7 +7,7 @@
  *
  * Nothing is stored, no request body is read, and the client IP is never
  * logged. The eight event names and their (PII-free) payloads are defined in
- * public/src/lib/emit.js.
+ * public/src/emit.js.
  */
 export function onRequest(context) {
   try {

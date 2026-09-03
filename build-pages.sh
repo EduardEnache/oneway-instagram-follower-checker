@@ -28,6 +28,10 @@ CF_BEACON="${CF_BEACON:-}"
 RELEASE="oneway@${CF_PAGES_COMMIT_SHA:-$(git rev-parse --short HEAD 2>/dev/null || echo dev)}"
 SENTRY_SDK_VERSION="${SENTRY_SDK_VERSION:-10.73.0}"
 
+# Parsed from the DSN (https://<key>@<host>/<projectId>) to pin the /st tunnel.
+SENTRY_INGEST_HOST="$(printf '%s' "$SENTRY_DSN" | sed -nE 's#^https?://[^@]*@([^/]+)/[0-9]+/?$#\1#p')"
+SENTRY_PROJECT_ID="$(printf '%s' "$SENTRY_DSN" | sed -nE 's#^.*/([0-9]+)/?$#\1#p')"
+
 rm -rf dist
 cp -r public dist
 
@@ -56,7 +60,10 @@ cp pages/_headers dist/_headers
 # NOT from inside dist/. This directory is gitignored.
 rm -rf functions
 mkdir functions
-cp pages/functions/e.js pages/functions/st.js functions/
+cp pages/functions/e.js functions/e.js
+sed -e "s|__SENTRY_INGEST_HOST__|${SENTRY_INGEST_HOST}|g" \
+    -e "s|__SENTRY_PROJECT_ID__|${SENTRY_PROJECT_ID}|g" \
+    pages/functions/st.tmpl.js > functions/st.js
 
 # --- the in-browser test runner is not a public endpoint ---------------
 rm -rf dist/src/tests

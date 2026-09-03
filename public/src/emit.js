@@ -7,12 +7,16 @@
  * attach a listener from outside the app (see public-extras/telemetry.js)
  * without this code ever needing to know a sink exists.
  *
+ * Lives at public/src/ (not lib/) so the pure parser layer stays DOM-free.
+ * Imports nothing.
+ *
  * Payloads carry NO usernames, NO display names, NO file names, NO counts
  * that could fingerprint an account, and NO export contents. Enum-ish values
  * and bucketed magnitudes only. Keep it that way.
  */
 export function emitAppEvent(name, data) {
   try {
+    if (typeof window === 'undefined' || typeof CustomEvent !== 'function') return;
     window.dispatchEvent(new CustomEvent('oneway:event', { detail: { name, data: data || {} } }));
   } catch { /* never let telemetry break the app */ }
 }

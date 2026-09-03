@@ -162,18 +162,22 @@ A's `lib/decode.js` (`fixMojibake`, `normalizeUsername`, `normalizeName`).
 
 ---
 
-## 5. `lib/emit.js` — app event bus (NOT part of this contract)
+## 5. `emit.js` — app event bus (NOT part of this contract)
 
-`public/src/lib/emit.js` (`emitAppEvent`, `bucket`) fires a plain DOM
-`CustomEvent('oneway:event')` on `window` at eight app moments (load, view open,
-export selected, parse ok/fail, contacts matched, data exported, snapshot saved).
-**Nothing in this repository listens to it**, and the default nginx CSP sends
-`connect-src 'none'`, so no listener could send it anywhere. Payloads are
-enum-ish values and bucketed magnitudes only — never a username, name, file
-name, raw count, or error message.
+`public/src/emit.js` (`emitAppEvent`, `bucket`) fires a plain DOM
+`CustomEvent('oneway:event')` on `window` at app moments (load, view open,
+export selected, parse ok/fail, contacts matched, data exported, snapshot saved;
+user-cancelled parses/matches emit nothing). **Nothing in this repository
+listens to it**, and the default nginx CSP sends `connect-src 'none'`, so no
+listener could send it anywhere. Payloads are enum-ish values and bucketed
+magnitudes only — never a username, name, file name, raw count, or error
+message.
 
-It is a leaf module: it imports nothing and is not referenced by the parser
-layer's data flow. It is **not** part of the frozen `AnalysisResult` /
+It is a leaf module: it imports nothing. It lives at `public/src/` (not `lib/`)
+so the pure parser files stay DOM-free, and it no-ops when there is no `window`.
+It is referenced by `main.js`, `state/store.js`, `export/download.js` and
+`lib/snapshots.js` (the one `lib/` file that is already browser-bound, via
+`localStorage`). It is **not** part of the frozen `AnalysisResult` /
 `analyzeExport` contract above — changing it changes no parser or UI behaviour,
 and the app runs identically whether or not a listener is attached. The
 temporary public demo attaches one from outside the app tree (see README §11).

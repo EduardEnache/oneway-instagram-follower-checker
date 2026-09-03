@@ -13,7 +13,7 @@
  */
 
 import mockAnalysis from '../fixtures/mock-analysis.js';
-import { emitAppEvent, bucket } from '../lib/emit.js';
+import { emitAppEvent, bucket } from '../emit.js';
 
 /** @typedef {import('../contracts/types.js').AnalysisResult} AnalysisResult */
 /** @typedef {import('../contracts/types.js').ContactMatch} ContactMatch */
@@ -136,7 +136,8 @@ function createStore() {
         const code = (e && e.code) || 'not-a-zip';
         parse = { status: 'error', progress: null, error: { code, message: String((e && e.message) || e) } };
         emit();
-        emitAppEvent('parse_failed', { code: (e && e.code) || 'unknown' });
+        // A user-cancelled parse ('aborted') is not a failure — don't report it.
+        if (code !== 'aborted') emitAppEvent('parse_failed', { code });
       }
     },
 
@@ -194,10 +195,13 @@ function createStore() {
           matches: null,
         };
         emit();
-        emitAppEvent('contacts_matched', {
-          status: 'error',
-          ms: Math.round((Date.now() - startedAt) / 100) * 100,
-        });
+        // A user-cancelled match ('aborted') is not a failure — don't report it.
+        if (code !== 'aborted') {
+          emitAppEvent('contacts_matched', {
+            status: 'error',
+            ms: Math.round((Date.now() - startedAt) / 100) * 100,
+          });
+        }
         return null;
       }
     },

@@ -279,6 +279,6 @@ into `dist/public-extras/config.js` from environment variables at build time;
 **Temporary.** The public demo is short‑lived. Teardown: delete the Cloudflare
 Pages project (and the Sentry project / Web Analytics site). The repo then
 returns to its default `connect-src 'none'`‑only posture — no listener, no
-analytics of any kind. `public/src/lib/emit.js` stays: it is a sinkless DOM
-event bus with nothing in‑repo listening, and under `connect-src 'none'` nothing
-could exfiltrate it.
+analytics of any kind. `public/src/emit.js` stays: it is a sinkless DOM event
+bus with nothing in‑repo listening, and under `connect-src 'none'` nothing could
+exfiltrate it.

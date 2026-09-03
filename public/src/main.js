@@ -8,7 +8,7 @@ import { createRouter } from './router.js';
 import { createAppShell } from './ui/app-shell.js';
 import { h } from './state/dom.js';
 import { emptyState } from './ui/components/empty-state.js';
-import { emitAppEvent } from './lib/emit.js';
+import { emitAppEvent } from './emit.js';
 
 import * as landing from './ui/views/landing.js';
 import * as dashboard from './ui/views/dashboard.js';

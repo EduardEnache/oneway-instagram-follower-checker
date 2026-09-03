@@ -5,7 +5,7 @@
  * (not sandboxed). Filenames: oneway-<listId>-<YYYY-MM-DD>.csv | .json
  */
 
-import { emitAppEvent } from '../lib/emit.js';
+import { emitAppEvent } from '../emit.js';
 
 /** Pull the list id back out of a `oneway-<list>-<date>.<ext>` filename. */
 function listFromFilename(filename) {
