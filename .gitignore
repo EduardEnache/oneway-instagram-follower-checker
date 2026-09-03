@@ -29,3 +29,7 @@ public-extras/sentry.min.js
 /functions/
 # wrangler local cache/state.
 /.wrangler/
+
+# graphify code-graph output (regenerated on demand; folded into the homelab
+# knowledge graph by ~/homelab-graphify-out/refresh-graph.sh, read from disk).
+/graphify-out/
