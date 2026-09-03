@@ -50,10 +50,15 @@ INJECT='<link rel="stylesheet" href="/public-extras/public.css"><script src="/pu
 sed "s|</head>|${INJECT}</head>|" dist/index.html > dist/index.html.tmp
 mv dist/index.html.tmp dist/index.html
 
-# --- headers (CSP) + the /e beacon Function -----------------------------
+# --- headers (CSP) -----------------------------------------------------
 sed "s|__SENTRY_INGEST_HOST__|${SENTRY_INGEST_HOST}|g" pages/_headers > dist/_headers
-mkdir -p dist/functions
-cp pages/functions/e.js dist/functions/e.js
+
+# --- the /e beacon Function ------------------------------------------
+# wrangler reads `functions/` from the repo root (sibling of the deploy dir),
+# NOT from inside dist/. This directory is gitignored.
+rm -rf functions
+mkdir functions
+cp pages/functions/e.js functions/e.js
 
 # --- the in-browser test runner is not a public endpoint ---------------
 rm -rf dist/src/tests
