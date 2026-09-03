@@ -1,6 +1,7 @@
 /* ONE·WAY — public-demo client telemetry.
  *
- * Loaded by the PUBLIC nginx variant only, as a CLASSIC script (no modules),
+ * Loaded by the public demo only (nginx/public.conf via sub_filter, or the
+ * Cloudflare Pages build via build-pages.sh), as a CLASSIC script (no modules),
  * after /public-extras/config.js and /public-extras/sentry.min.js.
  *
  * Hard rule: telemetry must NEVER throw into the app. A missing window.Sentry
@@ -106,7 +107,7 @@
         for (var k in data) {
           if (Object.prototype.hasOwnProperty.call(data, k)) qs.set(k, String(data[k]));
         }
-        navigator.sendBeacon('/__e?' + qs.toString());
+        navigator.sendBeacon('/e?' + qs.toString());
       } catch (e) {}
 
       // Escalate the one event worth quota: a real friend's export failing to parse.
@@ -153,16 +154,10 @@
         'No usernames, names or export contents are ever sent. '
       ));
 
-      // TODO(user): point at your repo README
       var a1 = document.createElement('a');
-      a1.href = 'https://github.com/';
-      a1.textContent = "What's the difference?";
+      a1.href = '#/about';
+      a1.textContent = "What's collected, and how to self-host";
       bar.appendChild(a1);
-      bar.appendChild(document.createTextNode(' · '));
-      var a2 = document.createElement('a');
-      a2.href = 'https://github.com/';
-      a2.textContent = 'Self-host it';
-      bar.appendChild(a2);
 
       var app = document.getElementById('app');
       if (app && app.parentNode === document.body) document.body.insertBefore(bar, app);

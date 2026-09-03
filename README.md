@@ -206,10 +206,15 @@ Dockerfile                  FROM nginx:1.27-alpine + COPY public/ — no build s
 docker-compose.yml          one hardened service: read-only fs, dropped caps, healthcheck
 .env.example                ONEWAY_PORT, ONEWAY_BIND
 
-nginx/public.conf           relaxed CSP for the public demo — public demo only, not used by `docker compose up`
-docker-compose.public.yml   compose file for the public demo — public demo only, not used by `docker compose up`
-public-extras/              telemetry.js listener injected only on the public demo — public demo only, not used by `docker compose up`
+public-extras/              telemetry.js listener + CSS, injected only on the public demo
+pages/                      Cloudflare Pages config: _headers (CSP), config.tmpl.js, functions/e.js
+build-pages.sh              assembles dist/ for the Pages public demo
+nginx/public.conf           relaxed CSP for a self-hosted public demo (Cloudflare Tunnel)
+docker-compose.public.yml   compose overlay for the self-hosted public demo
 ```
+
+Everything from `public-extras/` down is **public demo only** — none of it is
+used by `docker compose up`, and the image you build from this repo is unchanged.
 
 ## 10. Updating
 
@@ -221,21 +226,26 @@ public-extras/              telemetry.js listener injected only on the public de
 ## 11. The public demo (temporary)
 
 For a short period the app is also hosted as a **public** demo so people can try
-it without self‑hosting. The demo serves the **same `public/` tree** — the exact
-same app code — but with a different nginx config (`nginx/public.conf`) and an
-extra listener script from `public-extras/`, wired up by
-`docker-compose.public.yml`. None of those three files is used by `docker compose
-up`; the image you build from this repo is unchanged.
+it without self‑hosting. It is deployed to **Cloudflare Pages** and serves the
+**same `public/` tree** — the exact same app code — assembled by `build-pages.sh`,
+which adds a listener script from `public-extras/`, renders `config.js` from the
+environment, and sets a relaxed Content‑Security‑Policy via `pages/_headers`.
+`public/` is never modified; `docker compose up` still builds the unchanged
+`connect-src 'none'` image.
 
-**The relaxed CSP.** `nginx/public.conf` replaces `connect-src 'none'` with a
-narrow allow‑list:
+(`nginx/public.conf` + `docker-compose.public.yml` are an equivalent
+**self‑hosted** public variant — a Cloudflare Tunnel in front of the container —
+kept for reference. Neither is used by `docker compose up`.)
+
+**The relaxed CSP** (set by `pages/_headers`, mirrored in `nginx/public.conf`)
+replaces `connect-src 'none'` with a narrow allow‑list:
 
 ```
-default-src 'self'; script-src 'self' https://static.cloudflareinsights.com; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'self' https://cloudflareinsights.com <your-sentry-ingest-host>; form-action 'none'; frame-ancestors 'none'; base-uri 'none'
+default-src 'self'; script-src 'self' https://static.cloudflareinsights.com; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'self' https://cloudflareinsights.com <sentry-ingest-host>; form-action 'none'; frame-ancestors 'none'; base-uri 'none'
 ```
 
-`<your-sentry-ingest-host>` is filled in per deployment with the operator's
-Sentry ingest domain.
+`<sentry-ingest-host>` is filled in per deployment with the operator's Sentry
+ingest domain.
 
 **What the public demo collects:**
 
@@ -246,8 +256,10 @@ Sentry ingest domain.
   the eight app events the app emits: `app_loaded`, `view_opened`,
   `export_selected`, `parse_succeeded`, `parse_failed`, `contacts_matched`,
   `data_exported`, `snapshot_saved`.
-- **`/__e`** — the operator's own endpoint receives those same eight events and
-  forwards them to the operator's Loki/Grafana.
+- **`/e`** — a Cloudflare Pages Function receives those same eight events and
+  logs the query string (visible live via `wrangler pages deployment tail`).
+  Nothing is stored. (The self‑hosted nginx variant instead logs `/e` to stdout,
+  where promtail ships it to the operator's Loki/Grafana.)
 
 **What it does NOT collect:** no usernames, no display names, no file names, no
 counts beyond bucketed magnitudes (e.g. `1k-10k`), no cookies, and no visitor IP
@@ -256,8 +268,13 @@ export contents never leave the machine.
 
 **On "secrets".** The Sentry DSN and the Cloudflare beacon token are **public
 values** — they are shipped to every browser that loads the page and are
-designed to be public. They are not credentials and are safe to commit.
+designed to be public. They are not credentials. `build-pages.sh` renders them
+into `dist/public-extras/config.js` from environment variables at build time;
+`dist/` is gitignored, so nothing deployment‑specific lands in the repo.
 
-**Temporary.** The public demo is short‑lived. When it comes down, the repo
-returns to its default `connect-src 'none'`‑only posture with no listener and no
-analytics of any kind.
+**Temporary.** The public demo is short‑lived. Teardown: delete the Cloudflare
+Pages project (and the Sentry project / Web Analytics site). The repo then
+returns to its default `connect-src 'none'`‑only posture — no listener, no
+analytics of any kind. `public/src/lib/emit.js` stays: it is a sinkless DOM
+event bus with nothing in‑repo listening, and under `connect-src 'none'` nothing
+could exfiltrate it.

@@ -22,3 +22,6 @@ node_modules/
 !.env.example
 public-extras/config.js
 public-extras/sentry.min.js
+
+# Cloudflare Pages build output (assembled by build-pages.sh).
+/dist/
