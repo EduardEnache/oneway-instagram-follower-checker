@@ -24,6 +24,9 @@
     try {
       window.Sentry.init({
         dsn: cfg.sentryDsn,
+        // Same-origin tunnel (Pages: "/st") so ad/privacy blockers don't eat
+        // the envelope. Empty -> SDK posts straight to the Sentry ingest host.
+        tunnel: cfg.sentryTunnel || undefined,
         environment: cfg.sentryEnv || 'public',
         release: cfg.release,
         sampleRate: typeof cfg.sampleRate === 'number' ? cfg.sampleRate : 1.0,

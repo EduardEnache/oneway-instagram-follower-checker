@@ -1,11 +1,12 @@
 # Cloudflare Pages response headers for the ONE·WAY public demo.
-# Mirrors the header block of nginx/public.conf. build-pages.sh fills the Sentry
-# ingest host into the connect-src of the CSP below (SENTRY_INGEST_HOST env var).
+# Mirrors the header block of nginx/public.conf. Sentry envelopes go through the
+# same-origin /st tunnel Function, so connect-src needs only 'self' (plus the
+# Cloudflare RUM host); no *.ingest.sentry.io entry is required here.
 /*
-  Content-Security-Policy: default-src 'self'; script-src 'self' https://static.cloudflareinsights.com; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'self' https://cloudflareinsights.com __SENTRY_INGEST_HOST__; form-action 'none'; frame-ancestors 'none'; base-uri 'none'
+  Content-Security-Policy: default-src 'self'; script-src 'self' https://static.cloudflareinsights.com; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'self' https://cloudflareinsights.com; form-action 'none'; frame-ancestors 'none'; base-uri 'none'
   X-Content-Type-Options: nosniff
   Referrer-Policy: no-referrer
-  Permissions-Policy: camera=(), microphone=(), geolocation=(), interest-cohort=()
+  Permissions-Policy: camera=(), microphone=(), geolocation=()
 
 /index.html
   Cache-Control: no-cache

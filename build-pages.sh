@@ -5,14 +5,13 @@
 # telemetry assets alongside the pristine public/ tree, renders config.js from
 # the environment, fetches the Sentry SDK as a first-party asset, injects the
 # four <head> tags (nginx/public.conf does this with sub_filter), and drops in
-# the _headers CSP and the /e beacon Function.
+# the _headers CSP and the Pages Functions (/e beacon, /st Sentry tunnel).
 #
 # public/ and public-extras/*.js are never modified. Everything lands in dist/.
 #
 # Usage (from the repo root):
 #
-#   export SENTRY_DSN='https://<key>@oXXX.ingest.us.sentry.io/XXX'
-#   export SENTRY_INGEST_HOST='https://oXXX.ingest.us.sentry.io'
+#   export SENTRY_DSN='https://<key>@oXXX.ingest.de.sentry.io/XXX'
 #   export CF_BEACON=''        # optional: a Web Analytics beacon token. Leave
 #                              # empty to use the Pages project's own Web
 #                              # Analytics toggle instead.
@@ -25,7 +24,6 @@ set -euo pipefail
 cd "$(dirname "$0")"
 
 SENTRY_DSN="${SENTRY_DSN:-}"
-SENTRY_INGEST_HOST="${SENTRY_INGEST_HOST:-}"
 CF_BEACON="${CF_BEACON:-}"
 RELEASE="oneway@${CF_PAGES_COMMIT_SHA:-$(git rev-parse --short HEAD 2>/dev/null || echo dev)}"
 SENTRY_SDK_VERSION="${SENTRY_SDK_VERSION:-10.73.0}"
@@ -51,14 +49,14 @@ sed "s|</head>|${INJECT}</head>|" dist/index.html > dist/index.html.tmp
 mv dist/index.html.tmp dist/index.html
 
 # --- headers (CSP) -----------------------------------------------------
-sed "s|__SENTRY_INGEST_HOST__|${SENTRY_INGEST_HOST}|g" pages/_headers > dist/_headers
+cp pages/_headers dist/_headers
 
-# --- the /e beacon Function ------------------------------------------
+# --- Pages Functions: /e beacon + /st Sentry tunnel ------------------
 # wrangler reads `functions/` from the repo root (sibling of the deploy dir),
 # NOT from inside dist/. This directory is gitignored.
 rm -rf functions
 mkdir functions
-cp pages/functions/e.js functions/e.js
+cp pages/functions/e.js pages/functions/st.js functions/
 
 # --- the in-browser test runner is not a public endpoint ---------------
 rm -rf dist/src/tests

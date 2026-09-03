@@ -237,25 +237,29 @@ environment, and sets a relaxed Content‑Security‑Policy via `pages/_headers`
 **self‑hosted** public variant — a Cloudflare Tunnel in front of the container —
 kept for reference. Neither is used by `docker compose up`.)
 
-**The relaxed CSP** (set by `pages/_headers`, mirrored in `nginx/public.conf`)
-replaces `connect-src 'none'` with a narrow allow‑list:
+**The relaxed CSP** (set by `pages/_headers`) replaces `connect-src 'none'`
+with a narrow allow‑list:
 
 ```
-default-src 'self'; script-src 'self' https://static.cloudflareinsights.com; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'self' https://cloudflareinsights.com <sentry-ingest-host>; form-action 'none'; frame-ancestors 'none'; base-uri 'none'
+default-src 'self'; script-src 'self' https://static.cloudflareinsights.com; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'self' https://cloudflareinsights.com; form-action 'none'; frame-ancestors 'none'; base-uri 'none'
 ```
 
-`<sentry-ingest-host>` is filled in per deployment with the operator's Sentry
-ingest domain.
+Sentry gets no `connect-src` entry: envelopes go through the same‑origin `/st`
+tunnel Function (`pages/functions/st.js`), which forwards them to Sentry
+server‑side. This keeps the CSP tight and stops ad/privacy blockers from
+dropping error reports. The self‑hosted `nginx/public.conf` variant instead
+lists the Sentry ingest host directly (set `sentryTunnel: ""` in its
+`config.js`).
 
 **What the public demo collects:**
 
 - **Cloudflare Web Analytics** — one page view per document load (the app is a
   hash router, so route changes are not extra page views), referrer, country,
   and Core Web Vitals. No cookies, no cross‑site identifier.
-- **Sentry** — uncaught JavaScript errors (stack traces) plus, as breadcrumbs,
-  the eight app events the app emits: `app_loaded`, `view_opened`,
-  `export_selected`, `parse_succeeded`, `parse_failed`, `contacts_matched`,
-  `data_exported`, `snapshot_saved`.
+- **Sentry** (via the `/st` tunnel) — uncaught JavaScript errors (stack traces)
+  plus, as breadcrumbs, the eight app events the app emits: `app_loaded`,
+  `view_opened`, `export_selected`, `parse_succeeded`, `parse_failed`,
+  `contacts_matched`, `data_exported`, `snapshot_saved`.
 - **`/e`** — a Cloudflare Pages Function receives those same eight events and
   logs the query string (visible live via `wrangler pages deployment tail`).
   Nothing is stored. (The self‑hosted nginx variant instead logs `/e` to stdout,

@@ -27,3 +27,5 @@ public-extras/sentry.min.js
 /dist/
 # Pages Functions staged at repo root for `wrangler pages deploy` (source is pages/functions/).
 /functions/
+# wrangler local cache/state.
+/.wrangler/
