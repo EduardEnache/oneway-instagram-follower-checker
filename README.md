@@ -51,6 +51,9 @@ Even if the page's JavaScript tried to phone home, the browser would refuse.
    Headers** and read the `Content-Security-Policy`. Confirm it contains
    `connect-src 'none'`.
 
+These guarantees describe the image you build from this repository. A temporary
+public demo is described in §11.
+
 ## 3. Get your Instagram export
 
 1. In the Instagram app or on instagram.com, go to **Accounts Center** →
@@ -202,6 +205,10 @@ nginx/default.conf          MIME (application/javascript for .js/.mjs), gzip,
 Dockerfile                  FROM nginx:1.27-alpine + COPY public/ — no build stage
 docker-compose.yml          one hardened service: read-only fs, dropped caps, healthcheck
 .env.example                ONEWAY_PORT, ONEWAY_BIND
+
+nginx/public.conf           relaxed CSP for the public demo — public demo only, not used by `docker compose up`
+docker-compose.public.yml   compose file for the public demo — public demo only, not used by `docker compose up`
+public-extras/              telemetry.js listener injected only on the public demo — public demo only, not used by `docker compose up`
 ```
 
 ## 10. Updating
@@ -210,3 +217,47 @@ docker-compose.yml          one hardened service: read-only fs, dropped caps, he
 2. `docker compose up -d --build`
 3. Hard‑refresh the page (cache TTLs are only an hour, but a manual reload is
    instant).
+
+## 11. The public demo (temporary)
+
+For a short period the app is also hosted as a **public** demo so people can try
+it without self‑hosting. The demo serves the **same `public/` tree** — the exact
+same app code — but with a different nginx config (`nginx/public.conf`) and an
+extra listener script from `public-extras/`, wired up by
+`docker-compose.public.yml`. None of those three files is used by `docker compose
+up`; the image you build from this repo is unchanged.
+
+**The relaxed CSP.** `nginx/public.conf` replaces `connect-src 'none'` with a
+narrow allow‑list:
+
+```
+default-src 'self'; script-src 'self' https://static.cloudflareinsights.com; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'self' https://cloudflareinsights.com <your-sentry-ingest-host>; form-action 'none'; frame-ancestors 'none'; base-uri 'none'
+```
+
+`<your-sentry-ingest-host>` is filled in per deployment with the operator's
+Sentry ingest domain.
+
+**What the public demo collects:**
+
+- **Cloudflare Web Analytics** — one page view per document load (the app is a
+  hash router, so route changes are not extra page views), referrer, country,
+  and Core Web Vitals. No cookies, no cross‑site identifier.
+- **Sentry** — uncaught JavaScript errors (stack traces) plus, as breadcrumbs,
+  the eight app events the app emits: `app_loaded`, `view_opened`,
+  `export_selected`, `parse_succeeded`, `parse_failed`, `contacts_matched`,
+  `data_exported`, `snapshot_saved`.
+- **`/__e`** — the operator's own endpoint receives those same eight events and
+  forwards them to the operator's Loki/Grafana.
+
+**What it does NOT collect:** no usernames, no display names, no file names, no
+counts beyond bucketed magnitudes (e.g. `1k-10k`), no cookies, and no visitor IP
+in the operator's logs. The app itself still parses entirely in the browser; the
+export contents never leave the machine.
+
+**On "secrets".** The Sentry DSN and the Cloudflare beacon token are **public
+values** — they are shipped to every browser that loads the page and are
+designed to be public. They are not credentials and are safe to commit.
+
+**Temporary.** The public demo is short‑lived. When it comes down, the repo
+returns to its default `connect-src 'none'`‑only posture with no listener and no
+analytics of any kind.

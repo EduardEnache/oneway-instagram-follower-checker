@@ -12,3 +12,13 @@ Thumbs.db
 
 # Node (only used for throwaway dev scripts; no runtime dependency)
 node_modules/
+
+# Secrets and deployment-specific config for the temporary public demo.
+# TUNNEL_TOKEN is a real secret (grants tunnel control). The Sentry DSN and
+# CF beacon token in public-extras/config.js are NOT secrets (they ship to
+# every browser) but are deployment-specific, so they stay out of the repo.
+.env
+.env.*
+!.env.example
+public-extras/config.js
+public-extras/sentry.min.js

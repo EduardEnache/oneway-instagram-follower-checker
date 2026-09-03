@@ -1,0 +1,35 @@
+# ONE·WAY — PUBLIC overlay. Adds a Cloudflare tunnel and swaps in the
+# public-variant nginx config + telemetry assets. NOT for self-hosting.
+#
+#   docker compose -f docker-compose.yml -f docker-compose.public.yml up -d
+#
+# Requires TUNNEL_TOKEN in .env, and public-extras/config.js +
+# public-extras/sentry.min.js present on disk (both gitignored).
+#
+# No `networks:` key is needed: this is the same compose project as the base
+# file, so cloudflared lands on the project's default network and resolves
+# `oneway` by service name. The base service is not modified in any way that
+# affects the default deployment -- ports, bind address and hardening are
+# untouched; only read-only mounts are added.
+
+services:
+  oneway:
+    volumes:
+      - ./nginx/public.conf:/etc/nginx/conf.d/default.conf:ro
+      - ./public-extras:/usr/share/nginx/html/public-extras:ro
+
+  cloudflared:
+    # TODO(user): pin to the current tag from: docker run --rm cloudflare/cloudflared:latest --version
+    image: cloudflare/cloudflared:CLOUDFLARED_TAG_PLACEHOLDER
+    container_name: oneway-cloudflared
+    restart: unless-stopped
+    command: tunnel --no-autoupdate run
+    environment:
+      - TUNNEL_TOKEN=${TUNNEL_TOKEN:?TUNNEL_TOKEN is required; put it in .env}
+    depends_on:
+      oneway:
+        condition: service_healthy
+    cap_drop:
+      - ALL
+    security_opt:
+      - "no-new-privileges:true"

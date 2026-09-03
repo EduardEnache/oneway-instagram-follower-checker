@@ -1,0 +1,63 @@
+/* ONE·WAY — public-demo chrome.
+ *
+ * Styles for the two runtime-injected elements from /public-extras/telemetry.js
+ * ONLY: the persistent disclosure strip (.ow-public-banner) and the About-page
+ * CSP correction callout (.ow-public-about-note).
+ *
+ * Colours/spacing/type/border all come from public/styles/tokens.css custom
+ * properties, so both elements track light/dark via [data-theme] on <html>.
+ * Design system rules: hairline 1px borders, radius 0, no gradients, no shadow.
+ */
+
+/* --- Persistent disclosure strip ------------------------------------- */
+.ow-public-banner {
+  box-sizing: border-box;
+  width: 100%;
+  padding: var(--sp-2) var(--sp-4);
+  border-bottom: 1px solid var(--rule);
+  background: var(--surface-2);
+  color: var(--fg-muted);
+  font-family: var(--font-ui);
+  font-size: var(--fs-0);
+  line-height: var(--lh-body);
+  text-align: center;
+}
+
+.ow-public-banner strong {
+  color: var(--fg);
+  font-weight: 600;
+}
+
+.ow-public-banner em {
+  font-style: normal;
+  font-weight: 600;
+  color: var(--accent);
+}
+
+.ow-public-banner a {
+  color: var(--accent);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+.ow-public-banner a:focus-visible {
+  outline: 2px solid var(--focus);
+  outline-offset: 2px;
+}
+
+/* --- About-page CSP correction callout ------------------------------ */
+.ow-public-about-note {
+  margin-bottom: var(--sp-5);
+  padding: var(--sp-3) var(--sp-4);
+  border: 1px solid var(--rule);
+  border-left: 2px solid var(--accent);
+  background: var(--tint-accent);
+  color: var(--fg);
+  font-family: var(--font-ui);
+  font-size: var(--fs-0);
+  line-height: var(--lh-body);
+}
+
+.ow-public-about-note p {
+  margin: 0;
+}

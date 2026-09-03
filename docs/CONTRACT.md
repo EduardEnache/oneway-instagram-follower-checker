@@ -159,3 +159,21 @@ Import the shared formatters from `public/src/lib/format.js` (`formatDate`,
 `formatNumber`, `formatRatio`, `pluralize`, `profileUrl`, `truncateMiddle`,
 `unixToDate`). Do not re-implement them. Mojibake decoding is **not** here — it is
 A's `lib/decode.js` (`fixMojibake`, `normalizeUsername`, `normalizeName`).
+
+---
+
+## 5. `lib/emit.js` — app event bus (NOT part of this contract)
+
+`public/src/lib/emit.js` (`emitAppEvent`, `bucket`) fires a plain DOM
+`CustomEvent('oneway:event')` on `window` at eight app moments (load, view open,
+export selected, parse ok/fail, contacts matched, data exported, snapshot saved).
+**Nothing in this repository listens to it**, and the default nginx CSP sends
+`connect-src 'none'`, so no listener could send it anywhere. Payloads are
+enum-ish values and bucketed magnitudes only — never a username, name, file
+name, raw count, or error message.
+
+It is a leaf module: it imports nothing and is not referenced by the parser
+layer's data flow. It is **not** part of the frozen `AnalysisResult` /
+`analyzeExport` contract above — changing it changes no parser or UI behaviour,
+and the app runs identically whether or not a listener is attached. The
+temporary public demo attaches one from outside the app tree (see README §11).

@@ -8,6 +8,7 @@ import { createRouter } from './router.js';
 import { createAppShell } from './ui/app-shell.js';
 import { h } from './state/dom.js';
 import { emptyState } from './ui/components/empty-state.js';
+import { emitAppEvent } from './lib/emit.js';
 
 import * as landing from './ui/views/landing.js';
 import * as dashboard from './ui/views/dashboard.js';
@@ -67,6 +68,7 @@ function boot() {
           }),
         ),
       );
+      emitAppEvent('view_opened', { view: 'notfound', listId: '' });
       return;
     }
 
@@ -81,6 +83,10 @@ function boot() {
       const node = await mod.render({ store, route, navigate: (hh) => router.navigate(hh) });
       if (token !== renderToken) return; // superseded
       shell.setView(node);
+      emitAppEvent('view_opened', {
+        view: route.name,
+        listId: route.params.valid === '1' ? route.params.listId : '',
+      });
       window.scrollTo(0, 0);
     } catch (e) {
       console.error('view render failed', e);
@@ -114,6 +120,10 @@ function boot() {
 
   shell.refreshCounts();
   router.start();
+
+  emitAppEvent('app_loaded', {
+    mock: new URLSearchParams(location.search).has('mock') ? '1' : '0',
+  });
 }
 
 if (document.readyState === 'loading') {

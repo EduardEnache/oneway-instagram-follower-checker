@@ -18,6 +18,7 @@
 
 import { profileUrl } from './format.js';
 import { sortAccounts } from './analyze.js';
+import { emitAppEvent } from './emit.js';
 
 const INDEX_KEY = 'oneway.snapshots.index';
 const SNAP_PREFIX = 'oneway.snapshot.';
@@ -95,6 +96,7 @@ export function saveSnapshot(result, label) {
     localStorage.removeItem(SNAP_PREFIX + id); // roll back
     throw new QuotaError(quotaMessage(neededBytes), usedBytes(), neededBytes);
   }
+  emitAppEvent('snapshot_saved', {});
   return meta;
 }
 

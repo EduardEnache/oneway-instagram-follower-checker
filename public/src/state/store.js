@@ -13,6 +13,7 @@
  */
 
 import mockAnalysis from '../fixtures/mock-analysis.js';
+import { emitAppEvent, bucket } from '../lib/emit.js';
 
 /** @typedef {import('../contracts/types.js').AnalysisResult} AnalysisResult */
 /** @typedef {import('../contracts/types.js').ContactMatch} ContactMatch */
@@ -95,6 +96,15 @@ function createStore() {
      * @param {File|FileList|File[]} input
      */
     async setResultFromFile(input) {
+      emitAppEvent('export_selected', {
+        kind:
+          typeof File !== 'undefined' && input instanceof File
+            ? 'zip'
+            : Array.isArray(input) || (typeof FileList !== 'undefined' && input instanceof FileList)
+              ? 'folder'
+              : 'other',
+      });
+      const startedAt = Date.now();
       parse = { status: 'parsing', progress: { phase: 'start', pct: 0, message: 'Opening export…' }, error: null };
       emit();
       const ac = new AbortController();
@@ -117,10 +127,16 @@ function createStore() {
         contacts = { status: 'idle', pct: 0, error: null, matches: null };
         parse = { status: 'done', progress: null, error: null };
         emit();
+        const stats = (next && next.stats) || {};
+        emitAppEvent('parse_succeeded', {
+          ms: Math.round((Date.now() - startedAt) / 100) * 100,
+          size: bucket((stats.followerCount || 0) + (stats.followingCount || 0)),
+        });
       } catch (e) {
         const code = (e && e.code) || 'not-a-zip';
         parse = { status: 'error', progress: null, error: { code, message: String((e && e.message) || e) } };
         emit();
+        emitAppEvent('parse_failed', { code: (e && e.code) || 'unknown' });
       }
     },
 
@@ -138,6 +154,7 @@ function createStore() {
       if (contacts.status === 'done') return contacts.matches;
       if (contacts.status === 'loading') return null;
       if (!result) return null;
+      const startedAt = Date.now();
       contactAbort = new AbortController();
       contacts = { status: 'loading', pct: 0, error: null, matches: null };
       emit();
@@ -163,6 +180,10 @@ function createStore() {
         });
         contacts = { status: 'done', pct: 100, error: null, matches: matches || [] };
         emit();
+        emitAppEvent('contacts_matched', {
+          status: 'ok',
+          ms: Math.round((Date.now() - startedAt) / 100) * 100,
+        });
         return contacts.matches;
       } catch (e) {
         const code = (e && e.code) || 'error';
@@ -173,6 +194,10 @@ function createStore() {
           matches: null,
         };
         emit();
+        emitAppEvent('contacts_matched', {
+          status: 'error',
+          ms: Math.round((Date.now() - startedAt) / 100) * 100,
+        });
         return null;
       }
     },

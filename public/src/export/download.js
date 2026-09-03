@@ -5,6 +5,14 @@
  * (not sandboxed). Filenames: oneway-<listId>-<YYYY-MM-DD>.csv | .json
  */
 
+import { emitAppEvent } from '../lib/emit.js';
+
+/** Pull the list id back out of a `oneway-<list>-<date>.<ext>` filename. */
+function listFromFilename(filename) {
+  const m = /^oneway-(.+)-\d{4}-\d{2}-\d{2}\.(csv|json)$/.exec(String(filename || ''));
+  return m ? m[1] : 'unknown';
+}
+
 /**
  * @param {string} filename
  * @param {BlobPart} data
@@ -26,11 +34,13 @@ export function downloadBlob(filename, data, mime) {
 
 /** @param {string} filename @param {string} csv */
 export function downloadCsv(filename, csv) {
+  emitAppEvent('data_exported', { list: listFromFilename(filename), ext: 'csv' });
   downloadBlob(filename, csv, 'text/csv');
 }
 
 /** @param {string} filename @param {any} obj */
 export function downloadJson(filename, obj) {
+  emitAppEvent('data_exported', { list: listFromFilename(filename), ext: 'json' });
   downloadBlob(filename, JSON.stringify(obj, null, 2), 'application/json');
 }
 
