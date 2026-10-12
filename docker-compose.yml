@@ -22,6 +22,8 @@
 # tailnet device. Do NOT pair 0.0.0.0 with `tailscale funnel` — that would put
 # your follower data on the public internet.
 
+name: oneway
+
 services:
   oneway:
     build: .
