@@ -33,3 +33,4 @@ public-extras/sentry.min.js
 # graphify code-graph output (regenerated on demand; folded into the homelab
 # knowledge graph by ~/services/graphify-dashboard/refresh-graph.sh, read from disk).
 /graphify-out/
+
