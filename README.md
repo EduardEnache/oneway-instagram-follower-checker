@@ -1,212 +1,133 @@
-# ONE·WAY
+<div align="center">
 
-A local, private **"who doesn't follow me back"** analyzer for Instagram data
-exports. Point it at the `.zip` Instagram gives you and it shows non‑followers,
-fans (people you don't follow back), mutuals, pending and recent follow
-requests, recently unfollowed profiles, blocked accounts, close friends,
-hashtags you follow, and a best‑effort match of your phone contacts to
-accounts.
+<img src="https://capsule-render.vercel.app/api?type=waving&color=0:0d1117,55:1f2a44,100:3b82f6&height=200&section=header&text=ONE%C2%B7WAY&fontSize=56&fontColor=ffffff&fontAlignY=36&desc=Your%20Instagram%20follow%20graph%2C%20analysed%20in%20your%20browser&descSize=17&descAlignY=58&animation=fadeIn" width="100%" alt="ONE·WAY"/>
 
-Every feature is free. There is no account, no login, no upload, no paywall,
-no telemetry, no "pro" tier. It is a static web page and an nginx container.
+![JavaScript](https://img.shields.io/badge/JavaScript-ES%20modules-F7DF1E?style=flat-square&logo=javascript&logoColor=black)
+![No build](https://img.shields.io/badge/build%20step-none-0d1117?style=flat-square)
+![CSP](https://img.shields.io/badge/CSP-connect--src%20'none'-3b82f6?style=flat-square)
+![Docker](https://img.shields.io/badge/Docker-nginx%201.27-2496ED?style=flat-square&logo=docker&logoColor=white)
+![License](https://img.shields.io/badge/license-MIT-22c55e?style=flat-square)
 
----
+<sub><a href="#-what-it-does">What it does</a> &nbsp;·&nbsp; <a href="#-privacy-enforced-by-the-browser">Privacy</a> &nbsp;·&nbsp; <a href="#-architecture">Architecture</a> &nbsp;·&nbsp; <a href="#-run-it">Run it</a> &nbsp;·&nbsp; <a href="docs/GUIDE.md">Full guide</a></sub>
 
-## 1. What it is
+</div>
 
-You give Instagram a few days' notice, download your data export, and drop the
-`.zip` onto this page. It parses the export **in your browser** and renders the
-relationship views that sites like dontfollowback.com put behind a paywall —
-except here nothing is paid and nothing leaves your machine.
+<br/>
 
-It is designed to be self‑hosted: a single nginx container serving static
-files, reached from your own devices over Tailscale.
+> Drop the `.zip` Instagram gives you and see who doesn't follow you back, who you don't follow back,
+> pending and recent requests, recent unfollows, blocked accounts, close friends and more.
+> **Nothing is uploaded.** Parsing happens entirely in the tab, and the browser itself blocks every outbound request.
 
-## 2. Privacy, and how to verify it
+<br/>
 
-**Parsing is 100% in‑browser.** The `.zip` is read with the browser's built‑in
-`DecompressionStream`; the JSON inside is analyzed with plain JavaScript. The
-server (nginx) only ever sends static files — it has no database, no upload
-endpoint, no logging of request bodies, and nothing to receive an upload with.
+<img src=".github/assets/dashboard.webp" alt="ONE·WAY dashboard in dark mode" width="100%"/>
 
-The privacy claim is **enforced by the browser**, not just promised. The nginx
-config sends this header on every response:
+<table>
+  <tr>
+    <td width="50%"><img src=".github/assets/landing.webp" alt="Landing page with the export drop zone"/></td>
+    <td width="50%"><img src=".github/assets/non-followers.webp" alt="Non-followers list in light mode"/></td>
+  </tr>
+</table>
+
+<sub>Screenshots use the built-in sample data (<code>?mock=1</code>): generated names and handles, no real accounts.</sub>
+
+## ◆ &nbsp;What it does
+
+<table>
+  <tr>
+    <td width="33%" valign="top">
+      <h4>🔍 Relationships</h4>
+      <p>Non-followers, fans, mutuals, followers and following, each as a searchable, sortable table with CSV and JSON export.</p>
+    </td>
+    <td width="33%" valign="top">
+      <h4>📈 Insights</h4>
+      <p>Follower-growth timeline, follow-breakdown chart, pending and recent requests, recently unfollowed, blocked, close friends, followed hashtags.</p>
+    </td>
+    <td width="33%" valign="top">
+      <h4>🕓 Snapshots &amp; diffs</h4>
+      <p>Save a parse locally and compare it with a later export to see who left, with rename detection and honest caveats.</p>
+    </td>
+  </tr>
+  <tr>
+    <td width="33%" valign="top">
+      <h4>📇 Contact matching</h4>
+      <p>Fuzzy name-similarity matching of phone contacts to accounts, every match labelled with a confidence level and its reasons.</p>
+    </td>
+    <td width="33%" valign="top">
+      <h4>🌗 Polished UI</h4>
+      <p>Light, dark and auto themes, keyboard-friendly tables, responsive down to phone width, self-hosted fonts.</p>
+    </td>
+    <td width="33%" valign="top">
+      <h4>🆓 Every feature free</h4>
+      <p>No account, no login, no paywall, no "pro" tier, no telemetry. A static page and an nginx container.</p>
+    </td>
+  </tr>
+</table>
+
+## ◆ &nbsp;Privacy, enforced by the browser
+
+The privacy claim isn't a promise in a footer; it's a response header. nginx sends a strict
+Content-Security-Policy on every response:
 
 ```
-Content-Security-Policy: ... connect-src 'none'; ...
+Content-Security-Policy: default-src 'self'; script-src 'self'; connect-src 'none'; ...
 ```
 
-`connect-src 'none'` tells the browser to block *every* outbound network call
-the page could attempt — `fetch`, `XMLHttpRequest`, WebSocket, `sendBeacon`.
-Even if the page's JavaScript tried to phone home, the browser would refuse.
+`connect-src 'none'` makes the browser refuse **every** outbound call the page could attempt:
+`fetch`, `XMLHttpRequest`, WebSocket, `sendBeacon`. Even if the JavaScript tried to phone home, it couldn't.
+The `.zip` is read with the browser's native `DecompressionStream`, so there is no upload endpoint
+because there is nothing to upload to.
 
-**Verify it yourself:**
+**Verify it yourself:** open DevTools → Network, clear it, load your export, and watch the list stay empty.
 
-1. Open DevTools → **Network** tab. Click the 🚫 "clear" button.
-2. Load your export and let the analysis run.
-3. Confirm the request list stays **empty** — zero requests during and after
-   parsing. (You'll see the initial page/script/font loads only if you reload
-   with the tab open; parsing itself adds nothing.)
-4. Click the request for `/` (the document) → **Headers** → **Response
-   Headers** and read the `Content-Security-Policy`. Confirm it contains
-   `connect-src 'none'`.
+## ◆ &nbsp;Architecture
 
-## 3. Get your Instagram export
+```mermaid
+flowchart LR
+    Z["Instagram export (.zip)"] -->|File API| R
+    subgraph Browser tab
+      R["zip reader<br/>DecompressionStream"] --> P["parser<br/>mojibake fix · set math"]
+      P --> M["contact matcher<br/>name similarity"]
+      P --> S[("snapshots<br/>localStorage")]
+      P --> UI["views<br/>router · tables · charts"]
+      M --> UI
+      UI --> X["CSV / JSON export"]
+    end
+    N["nginx container<br/>static files + CSP"] -. serves .-> R
+```
 
-1. In the Instagram app or on instagram.com, go to **Accounts Center** →
-   **Your information and permissions** → **Download your information**.
-2. Request a **new export**. Choose:
-   - **Format: JSON** — *not* HTML. The HTML format will not parse.
-   - **Date range:** All time.
-   - **Content:** at minimum **Followers and following** and **Contacts**
-     (a.k.a. "Contacts" / synced contacts). "Some of your information" with
-     those two boxes ticked is enough; "All available information" also works.
-3. Submit. Instagram takes anywhere from a few minutes to a few days to email
-   you a download link.
-4. Download the `.zip`. **Feed it in as‑is** — you do not need to unzip it.
-   (For debugging you can instead pick an already‑extracted folder; the page
-   has a "choose a folder" option next to the drop zone.)
+- **Zero build.** Plain ES modules served as static files; no bundler, no framework, no dependencies to audit.
+- **Two layers with a frozen contract.** The parser (`public/src/lib`) produces one `AnalysisResult`
+  ([docs/CONTRACT.md](docs/CONTRACT.md)); the UI (`public/src/state|ui|export`) only consumes it.
+- **Design system as tokens.** Colours, type and spacing live in `public/styles` ([docs/DESIGN.md](docs/DESIGN.md)).
+- **Hardened container.** `nginx:1.27-alpine`, read-only filesystem, dropped capabilities, healthcheck, loopback bind by default.
+- **Tests in the browser.** `public/src/tests/` runs the parser and UI suites against a synthetic export.
 
-## 4. Run it
+## ◆ &nbsp;Run it
 
 ```sh
-# 1. (optional) choose a port / bind address
-cp .env.example .env
-#    edit .env if you want something other than 127.0.0.1:8477
-
-# 2. build and start
-docker compose up -d --build
-
-# 3. open it
-#    http://127.0.0.1:8477
+cp .env.example .env          # optional: change port / bind address
+docker compose up -d --build  # nginx on 127.0.0.1:8477
 ```
 
-Everyday commands:
+Open <http://127.0.0.1:8477>, or <http://127.0.0.1:8477/?mock=1> to explore with sample data.
+Needs Chrome/Edge 103+, Firefox 113+ or Safari 16.4+.
 
-| Command | What it does |
-|---|---|
-| `docker compose ps` | Show status — the `STATUS` column should read `healthy` after ~30 s. |
-| `docker compose logs -f` | Follow nginx's access/error log. |
-| `docker compose down` | Stop and remove the container. Nothing is lost — there is no state. |
-| `docker compose up -d --build` | Rebuild and restart after you've changed anything under `public/`. |
+Getting your export, private access over Tailscale, snapshots, known limitations and the project layout are all in the
+**[full guide](docs/GUIDE.md)**.
 
-## 5. Access over Tailscale
+## ◆ &nbsp;Tech
 
-Install Tailscale on the mini PC and bring it up:
+![HTML5](https://img.shields.io/badge/HTML5-E34F26?style=flat-square&logo=html5&logoColor=white)
+![CSS3](https://img.shields.io/badge/CSS3-1572B6?style=flat-square&logo=css3&logoColor=white)
+![JavaScript](https://img.shields.io/badge/JavaScript-F7DF1E?style=flat-square&logo=javascript&logoColor=black)
+![nginx](https://img.shields.io/badge/nginx-009639?style=flat-square&logo=nginx&logoColor=white)
+![Docker](https://img.shields.io/badge/Docker-2496ED?style=flat-square&logo=docker&logoColor=white)
+![Tailscale](https://img.shields.io/badge/Tailscale-242424?style=flat-square&logo=tailscale&logoColor=white)
 
-```sh
-sudo tailscale up
-```
+<br/>
 
-**Recommended — `tailscale serve`:**
-
-```sh
-sudo tailscale serve --bg --https=443 http://127.0.0.1:8477
-```
-
-This publishes the container at `https://<machine>.<tailnet>.ts.net` — reachable
-from any device signed into *your* tailnet, with MagicDNS and an automatic
-Let's Encrypt certificate. It stays private to your tailnet. This pairs with
-the default `ONEWAY_BIND=127.0.0.1`, so the container is never exposed on the
-LAN.
-
-Check and undo:
-
-```sh
-tailscale serve status          # show what's published
-sudo tailscale serve --https=443 off
-```
-
-> **Do NOT use `tailscale funnel`.** Funnel puts the service on the *public
-> internet*. Your follower list, contacts, and blocked accounts are exactly the
-> kind of data that must never be publicly reachable. `tailscale funnel status`
-> should always show nothing for this service.
-
-**Alternative — direct tailnet IP, no `serve`:**
-
-```sh
-# in .env
-ONEWAY_BIND=0.0.0.0
-ONEWAY_PORT=8477
-```
-
-```sh
-docker compose up -d
-# then from a tailnet device:
-#   http://<tailscale-ip-of-mini-pc>:8477
-```
-
-This skips the HTTPS cert and MagicDNS name but needs no `serve` command. It is
-still tailnet‑only as long as the mini PC's firewall doesn't forward 8477 from
-the public internet.
-
-## 6. Browser support
-
-Reading the `.zip` needs the `DecompressionStream` API:
-
-| Browser | Minimum version |
-|---|---|
-| Chrome / Edge | 103 |
-| Firefox | 113 |
-| Safari | 16.4 |
-
-Older browsers load the page but show a clear error when you try to open an
-export. (If your export happens to be entirely *stored* — uncompressed — inside
-the zip it may still work, but don't count on it.)
-
-## 7. Snapshots & storage
-
-You can save a **snapshot** of a parse to compare against a future export
-("who unfollowed me since March?"). Snapshots live in **that browser's
-`localStorage` only**:
-
-- They do **not** sync between devices or browsers.
-- Clearing site data / browser storage deletes them.
-- Storage is roughly 5 MB per origin; the app packs snapshots tightly (~20
-  bytes per account) and warns you as you approach the limit.
-
-## 8. Known limitations
-
-- **"Unfollowed you" detection is a heuristic.** Instagram's export does not
-  include stable account IDs in the followers list, so when an account
-  disappears between two exports the app cannot be *certain* whether they
-  unfollowed you, renamed their handle, deactivated, or were banned. It flags
-  likely renames (a lost + gained pair sharing an identical follow timestamp)
-  and always states the caveat. Treat "unfollowed you" as "probably".
-- **Contact → account matching is a guess.** It compares your contact's saved
-  name to account display names and handles using name‑similarity scoring
-  alone. It is frequently wrong, especially for common names. The Contacts view
-  labels every match with a confidence level and the reasons behind it, and
-  defaults to showing only high‑confidence matches. Do not act on a match
-  without recognising the account yourself.
-- **Phone numbers** from your contacts are never included in any export or
-  snapshot unless you explicitly tick the clearly‑labelled checkbox.
-
-## 9. Project layout
-
-```
-public/                     the entire app — static files, no build step
-  index.html                app shell; loads ES modules from src/
-  theme-init.js              tiny pre-paint theme setter (kept external for a strict CSP)
-  favicon.svg  robots.txt
-  styles/*.css              design system: tokens, base, layout, components, charts
-  assets/fonts/*.woff2      self-hosted Bricolage Grotesque / Inter / JetBrains Mono
-  src/lib/*.js              the parser: zip reading, mojibake fixing, set math,
-                            contact matching, snapshot diffing (pipeline.js is the entry)
-  src/state|ui|export/*.js  the interface: store, hash router, views, data table, CSV/JSON export
-  src/fixtures/             mock AnalysisResult + a synthetic mini-export for tests
-  src/tests/index.html      in-browser test runner (reachable at /src/tests/)
-
-nginx/default.conf          MIME (application/javascript for .js/.mjs), gzip,
-                            short cache TTLs, hash-router fallback, security headers
-Dockerfile                  FROM nginx:1.27-alpine + COPY public/ — no build stage
-docker-compose.yml          one hardened service: read-only fs, dropped caps, healthcheck
-.env.example                ONEWAY_PORT, ONEWAY_BIND
-```
-
-## 10. Updating
-
-1. Replace files under `public/` with the new version.
-2. `docker compose up -d --build`
-3. Hard‑refresh the page (cache TTLs are only an hour, but a manual reload is
-   instant).
+<div align="center">
+<sub>Built by <a href="https://github.com/LikeMyCoffe"><b>Eduard-Florentin Enache</b></a> &nbsp;·&nbsp; Data · BI · AI product builder &nbsp;·&nbsp; MIT licensed</sub>
+<img src="https://capsule-render.vercel.app/api?type=waving&color=0:3b82f6,45:1f2a44,100:0d1117&height=90&section=footer" width="100%" alt=""/>
+</div>
