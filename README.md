@@ -128,6 +128,6 @@ Getting your export, private access over Tailscale, snapshots, known limitations
 <br/>
 
 <div align="center">
-<sub>Built by <a href="https://github.com/LikeMyCoffe"><b>Eduard-Florentin Enache</b></a> &nbsp;·&nbsp; Data · BI · AI product builder &nbsp;·&nbsp; MIT licensed</sub>
+<sub>Built by <a href="https://github.com/EduardEnache"><b>Eduard-Florentin Enache</b></a> &nbsp;·&nbsp; Data · BI · AI product builder &nbsp;·&nbsp; MIT licensed</sub>
 <img src="https://capsule-render.vercel.app/api?type=waving&color=0:3b82f6,45:1f2a44,100:0d1117&height=90&section=footer" width="100%" alt=""/>
 </div>
